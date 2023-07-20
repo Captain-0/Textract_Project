@@ -7,7 +7,7 @@ import fitz  # this is pymupdf
 import spacy
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'saved_file'
+app.config['UPLOAD_FOLDER'] = 'static'
 nlp = spacy.load("en_core_web_sm")
 
 
@@ -21,28 +21,37 @@ def upload_file():
     if 'file' in request.files:
         file = request.files['file']
         if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            # Here you should save the file
-            file.save(f'C:\\Users\\1\\Documents\\Textract Project\\saved_file\\{filename}.pdf')
-            with fitz.open(f"C:\\Users\\1\\Documents\\Textract Project\\saved_file\\{filename}.pdf") as doc:
-                text = [anotherelement["text"] for page in doc
-                        for item in page.get_text("dict")["blocks"]
-                        for element in item["lines"]
-                        for anotherelement in element["spans"]]
-                text = [item for item in text if len(item) > 1]
-            file_location = f'/saved_file/{filename}'
-
-            result = {}
-            doc = nlp("".join(text))
-            for ent in doc.ents:
-                print(f"{ent.label_} = {ent.text}")
-                result[ent.label_] = ent.text
-            print(result)
-            send_file(f'C:\\Users\\1\\Documents\\Textract Project\\saved_file\\{filename}.pdf', as_attachment=False)
-
+            filename = file.filename
+            print(filename)
+            save_file(file, filename)
+            text = extract_text_from_file(filename)
+            result = process_text(text)
+            file_location = f'/static/{filename}'
+            send_file(os.path.join(app.root_path, 'static', filename), as_attachment=False)
             return render_template("display_page.html", filename=file_location, dictionary=result)
-
     return 'File upload failed'
+
+
+def save_file(file, filename):
+    file.save(os.path.join(app.root_path, 'static', filename))
+
+
+def extract_text_from_file(filename):
+    with fitz.open(os.path.join(app.root_path, 'static', filename)) as doc:
+        text = [anotherelement["text"] for page in doc
+                for item in page.get_text("dict")["blocks"]
+                for element in item["lines"]
+                for anotherelement in element["spans"]]
+        text = [item for item in text if len(item) > 1]
+    return text
+
+
+def process_text(text):
+    result = {}
+    doc = nlp("".join(text))
+    for ent in doc.ents:
+        result[ent.label_] = ent.text
+    return result
 
 
 # def handle_submit():
@@ -57,10 +66,7 @@ def upload_file():
 
 
 def convert_to_csv(form_data):
-    print("form data from convert to csv")
-    print(form_data)
     data = [{'key': key, 'value': value} for key, value in form_data.items()]
-    print(data)
     fieldnames = ['key', 'value']
 
     csv_filename = 'data.csv'
@@ -78,8 +84,6 @@ def convert_to_csv(form_data):
 def download_csv():
     csv_filepath = convert_to_csv(request.form)
     return send_file(csv_filepath, as_attachment=True, download_name='data.csv')
-
-
 
 
 ALLOWED_EXTENSIONS = {'pdf'}

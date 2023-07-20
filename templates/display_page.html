@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
-  <style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <style>
     .container {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -38,14 +38,15 @@
       border: none;
       cursor: pointer;
     }
-  </style>
+
+    </style>
 </head>
 <body>
 
 <div class="container">
     <div>
         <h2>Uploaded Document</h2>
-        <embed src="http://127.0.0.1:8000{{ filename }}.pdf" width="500" height="600" type="application/pdf">
+        <embed src="http://127.0.0.1:8000{{ filename }}" width="500" height="600" type="application/pdf">
     </div>
     <div>
         <h2>Retrieved Values</h2>
